@@ -2,7 +2,7 @@ name: Deploy Dev Stand
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: ["dev"]
 
 jobs:
   build-and-deploy:
@@ -22,7 +22,7 @@ jobs:
 
       # Установка pnpm (если runner чистый)
       - name: Install pnpm
-        run: npm install -g pnpm
+        run: sudo npm install -g pnpm
 
       # Установка зависимостей
       - name: Install deps
