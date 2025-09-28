@@ -20,10 +20,6 @@ jobs:
           restore-keys: |
             pnpm-store-${{ runner.os }}-
 
-      # Установка pnpm (если runner чистый)
-      - name: Install pnpm
-        run: sudo npm install -g pnpm
-
       # Установка зависимостей
       - name: Install deps
         run: pnpm install --frozen-lockfile
