@@ -31,9 +31,9 @@ jobs:
       # Деплой на Nginx
       - name: Deploy to Nginx
         run: |
-          sudo rm -rf /var/www/html/*
-          sudo cp -r build/* /var/www/html/
-          sudo systemctl reload nginx
+          rm -rf /var/www/html/*
+          cp -r build/* /var/www/html/
+          systemctl reload nginx
 
       # Лог успешного деплоя
       - name: Log deploy
