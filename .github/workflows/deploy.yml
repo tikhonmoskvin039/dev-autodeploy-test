@@ -2,40 +2,43 @@ name: Deploy Dev Stand
 
 on:
   push:
-    branches: ["dev"] # деплой только на dev
+    branches: [ "dev" ]
 
 jobs:
   build-and-deploy:
     runs-on: self-hosted
 
     steps:
-      # 1. Клонируем репозиторий
       - uses: actions/checkout@v3
 
-      # 2. Кэшируем node_modules для ускорения сборки
-      - name: Cache npm
+      # Кэш pnpm
+      - name: Cache pnpm store
         uses: actions/cache@v3
         with:
-          path: ~/.npm
-          key: npm-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          path: ~/.pnpm-store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
-            npm-cache-${{ runner.os }}-
+            pnpm-store-${{ runner.os }}-
 
-      # 3. Установка зависимостей
+      # Установка pnpm (если runner чистый)
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      # Установка зависимостей
       - name: Install deps
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
-      # 4. Сборка проекта
+      # Сборка проекта
       - name: Build
-        run: npm run build
+        run: pnpm build
 
-      # 5. Деплой на Nginx
+      # Деплой на Nginx
       - name: Deploy to Nginx
         run: |
           sudo rm -rf /var/www/html/*
           sudo cp -r build/* /var/www/html/
           sudo systemctl reload nginx
 
-      # 6. Логируем успешный деплой
+      # Лог успешного деплоя
       - name: Log deploy
         run: echo "✅ Deploy finished at $(date)"
