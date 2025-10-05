@@ -20,5 +20,5 @@ jobs:
         run: |
           docker stop myapp || true
           docker rm myapp || true
-          docker run -d --name myapp -p 81:80 myapp:dev
-          # docker run -d --name myapp -p 80:80 myapp:dev
+          # docker run -d --name myapp -p 81:80 myapp:dev
+          docker run -d --name myapp -p 80:80 myapp:dev
