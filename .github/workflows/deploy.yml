@@ -11,27 +11,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # Кэш pnpm
-      - name: Cache pnpm store
-        uses: actions/cache@v3
-        with:
-          path: ~/.pnpm-store
-          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-${{ runner.os }}-
+      # Сборка и пуш Docker-образа
+      - name: Build Docker image
+        run: |
+          docker build -t myapp:dev .
 
-      # Установка зависимостей
-      - name: Install deps
-        run: pnpm install --frozen-lockfile
-
-      # Сборка проекта
-      - name: Build
-        run: pnpm build
-
-      # Деплой на Nginx
-      - name: Deploy to Nginx
-        run: cp -r dist/* /var/www/html/
-
-      # Лог успешного деплоя
-      - name: Log deploy
-        run: echo "✅ Deploy finished at $(date)"
+      - name: Run container
+        run: |
+          docker stop myapp || true
+          docker rm myapp || true
+          docker run -d --name myapp -p 80:80 myapp:dev

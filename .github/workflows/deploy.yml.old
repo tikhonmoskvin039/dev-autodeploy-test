@@ -1,0 +1,37 @@
+name: Deploy Dev Stand
+
+on:
+  push:
+    branches: ["dev"]
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Кэш pnpm
+      - name: Cache pnpm store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
+
+      # Установка зависимостей
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      # Сборка проекта
+      - name: Build
+        run: pnpm build
+
+      # Деплой на Nginx
+      - name: Deploy to Nginx
+        run: cp -r dist/* /var/www/html/
+
+      # Лог успешного деплоя
+      - name: Log deploy
+        run: echo "✅ Deploy finished at $(date)"
