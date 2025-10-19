@@ -1,24 +1,48 @@
-name: Deploy Dev Stand
+name: Build and Deploy via GHCR
 
 on:
   push:
     branches: ["dev"]
 
 jobs:
-  build-and-deploy:
-    runs-on: self-hosted
+  # 1️⃣ Билдим Docker-образ в облаке
+  build-and-push:
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
 
-      # Сборка и пуш Docker-образа
-      - name: Build Docker image
-        run: |
-          docker build -t myapp:dev .
+      # Логин в GitHub Container Registry
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run container
+      # Сборка и пуш
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}/myapp:dev
+
+  # 2️⃣ Деплой на self-hosted ВМ
+  deploy:
+    runs-on: self-hosted
+    needs: build-and-push
+
+    steps:
+      - name: Log in to GHCR
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Pull and restart container
         run: |
+          docker pull ghcr.io/${{ github.repository }}/myapp:dev
           docker stop myapp || true
           docker rm myapp || true
-          # docker run -d --name myapp -p 81:80 myapp:dev
-          docker run -d --name myapp -p 80:80 myapp:dev
+          docker run -d --name myapp -p 80:80 ghcr.io/${{ github.repository }}/myapp:dev
+
+      - name: Log deploy
+        run: echo "✅ Deploy completed at $(date)"

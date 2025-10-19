@@ -1,0 +1,24 @@
+name: Deploy Dev Stand
+
+on:
+  push:
+    branches: ["dev"]
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Сборка и пуш Docker-образа
+      - name: Build Docker image
+        run: |
+          docker build -t myapp:dev .
+
+      - name: Run container
+        run: |
+          docker stop myapp || true
+          docker rm myapp || true
+          # docker run -d --name myapp -p 81:80 myapp:dev
+          docker run -d --name myapp -p 80:80 myapp:dev

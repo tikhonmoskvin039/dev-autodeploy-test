@@ -18,7 +18,7 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
+        <button style={{backgroundColor: "orangered", color: 'white'}} onClick={() => setCount((count) => count + 1)}>
           count is {count} with some changes{" "}
           <b>and that part directly came from docker image</b>{" "}
           <i style={{ color: "orangered" }}>!!!</i>
